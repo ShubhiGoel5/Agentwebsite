@@ -287,16 +287,62 @@ HTML_CONTENT = """<!DOCTYPE html>
         .status-success { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
         .status-escalated { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
 
-        /* Timeline Event Stream */
-        .trace-container {
+        /* Result Card */
+        .result-card {
+            background: rgba(16, 185, 129, 0.07);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        .result-card.error {
+            background: rgba(239, 68, 68, 0.07);
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+        .result-card.paused {
+            background: rgba(245, 158, 11, 0.07);
+            border-color: rgba(245, 158, 11, 0.25);
+        }
+        .result-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .result-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        .result-body {
+            font-size: 0.95rem;
+            color: #d1fae5;
+            line-height: 1.6;
+        }
+        .result-card.error .result-body { color: #fca5a5; }
+        .result-card.paused .result-body { color: #fde68a; }
+        .result-data-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 1rem;
+        }
+        .result-data-pill {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .result-data-pill strong { color: var(--text-main); }
+
+        /* Step Timeline */
+        .steps-container {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 1.5rem;
             min-height: 500px;
         }
-
-        .trace-header {
+        .steps-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -304,67 +350,87 @@ HTML_CONTENT = """<!DOCTYPE html>
             padding-bottom: 1rem;
             border-bottom: 1px solid var(--border-color);
         }
-
         .timeline {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0;
         }
-
-        .event-card {
-            background: rgba(17, 24, 39, 0.5);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1rem 1.25rem;
-            position: relative;
-            transition: border-color 0.2s;
-        }
-
-        .event-card:hover {
-            border-color: var(--border-accent);
-        }
-
-        .event-header {
+        .step-row {
             display: flex;
-            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.85rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            align-items: flex-start;
+            animation: fadeSlideIn 0.3s ease forwards;
+        }
+        .step-row:last-child { border-bottom: none; }
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .step-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
             align-items: center;
-            margin-bottom: 0.5rem;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
         }
-
-        .event-type {
-            font-size: 0.8rem;
-            font-weight: 700;
-            font-family: var(--font-mono);
+        .step-icon.start    { background: rgba(59,130,246,0.15); }
+        .step-icon.tool     { background: rgba(139,92,246,0.15); }
+        .step-icon.success  { background: rgba(16,185,129,0.15); }
+        .step-icon.warning  { background: rgba(245,158,11,0.15); }
+        .step-icon.error    { background: rgba(239,68,68,0.15); }
+        .step-icon.verify   { background: rgba(56,189,248,0.15); }
+        .step-icon.ask      { background: rgba(245,158,11,0.15); }
+        .step-body { flex: 1; min-width: 0; }
+        .step-label {
+            font-size: 0.82rem;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 0.2rem;
         }
-
-        .type-task_start { color: var(--accent-blue); }
-        .type-tool_call_decided { color: var(--accent-purple); }
-        .type-tool_execution { color: var(--accent-green); }
-        .type-policy_check { color: var(--accent-amber); }
-        .type-verification_check { color: #38bdf8; }
-        .type-task_end { color: var(--accent-green); }
-        .type-strike_count { color: var(--accent-red); }
-
-        .event-msg {
+        .step-desc {
             font-size: 0.95rem;
             font-weight: 500;
             color: var(--text-main);
-            margin-bottom: 0.5rem;
+            line-height: 1.4;
         }
-
-        .event-data {
-            background: rgba(0, 0, 0, 0.4);
+        .step-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            margin-top: 0.2rem;
+        }
+        .step-detail-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.15rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            margin-top: 0.4rem;
+            transition: all 0.15s;
+        }
+        .step-detail-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+        .step-detail-raw {
+            display: none;
+            margin-top: 0.6rem;
+            background: rgba(0,0,0,0.4);
             border-radius: 8px;
             padding: 0.75rem;
             font-family: var(--font-mono);
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: #a7f3d0;
             overflow-x: auto;
             white-space: pre-wrap;
         }
-
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -454,18 +520,25 @@ HTML_CONTENT = """<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- Trace Event Log Stream -->
-            <div class="trace-container">
-                <div class="trace-header">
-                    <div style="font-weight: 600; font-size: 1.1rem; color: #fff;">📜 Live Execution Event Trace (JSONL Log)</div>
-                    <button style="background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem;" onclick="clearTrace()">Clear Timeline</button>
-                </div>
+            <!-- Result Summary Card -->
+            <div class="result-card" id="resultCard">
+                <div class="result-icon" id="resultIcon">✅</div>
+                <div class="result-title" id="resultTitle">Task Complete</div>
+                <div class="result-body" id="resultBody"></div>
+                <div class="result-data-grid" id="resultDataGrid"></div>
+            </div>
 
+            <!-- Step-by-step Timeline -->
+            <div class="steps-container">
+                <div class="steps-header">
+                    <div style="font-weight: 600; font-size: 1.1rem; color: #fff;">🪄 What the Agent Did</div>
+                    <button style="background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem;" onclick="clearTrace()">Clear</button>
+                </div>
                 <div class="timeline" id="timeline">
                     <div class="empty-state">
                         <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚙️</div>
-                        <div>No active task execution running yet.</div>
-                        <div style="font-size: 0.85rem; margin-top: 0.25rem;">Select a task blueprint on the left and click "Launch Task Loop".</div>
+                        <div>No task run yet.</div>
+                        <div style="font-size: 0.85rem; margin-top: 0.25rem;">Select a task on the left and click "Launch Task Loop".</div>
                     </div>
                 </div>
             </div>
@@ -478,12 +551,32 @@ HTML_CONTENT = """<!DOCTYPE html>
             document.getElementById('apiKeyGroup').style.display = (mode === 'openrouter') ? 'block' : 'none';
         }
 
+        // ── Human-readable labels for each event type ──────────────────────
+        const EVENT_META = {
+            task_start:          { icon: '🚀', cls: 'start',   label: 'Task Started' },
+            llm_request:         null,   // hide — internal plumbing
+            llm_error:           { icon: '❌', cls: 'error',   label: 'Model Error' },
+            tool_call_decided:   { icon: '🔧', cls: 'tool',    label: 'Action Chosen' },
+            policy_check:        { icon: '🛡️', cls: 'warning', label: 'Safety Check' },
+            transient_retry:     { icon: '🔄', cls: 'warning', label: 'Retrying...' },
+            tool_execution:      { icon: '⚡', cls: 'tool',    label: 'Action Executed' },
+            final_claim:         { icon: '📋', cls: 'verify',  label: 'Result Submitted' },
+            verification_check:  { icon: '🔍', cls: 'verify',  label: 'Verifying Result' },
+            strike_count:        { icon: '⚠️', cls: 'error',   label: 'Validation Issue' },
+            loop_detected:       { icon: '🔁', cls: 'error',   label: 'Loop Detected' },
+            ask_user:            { icon: '❓', cls: 'ask',     label: 'Needs Your Input' },
+            task_end:            { icon: '✅', cls: 'success', label: 'Task Complete' },
+            escalated:           { icon: '🚨', cls: 'error',   label: 'Escalated' },
+            max_steps_exceeded:  { icon: '⏱️', cls: 'error',   label: 'Step Limit Reached' },
+        };
+
         function clearTrace() {
             document.getElementById('timeline').innerHTML = `
                 <div class="empty-state">
                     <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚙️</div>
-                    <div>No active task execution running yet.</div>
+                    <div>No task run yet.</div>
                 </div>`;
+            document.getElementById('resultCard').style.display = 'none';
             document.getElementById('statusBadge').className = 'status-badge status-idle';
             document.getElementById('statusBadge').innerText = 'IDLE';
             document.getElementById('stepsValue').innerText = '0';
@@ -528,8 +621,9 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         function renderExecutionResult(res) {
+            // ── Metric badges ─────────────────────────────────────────────
             document.getElementById('stepsValue').innerText = res.steps_taken;
-            
+
             const badge = document.getElementById('statusBadge');
             badge.innerText = res.status.toUpperCase();
             if (res.status === 'success') badge.className = 'status-badge status-success';
@@ -538,34 +632,112 @@ HTML_CONTENT = """<!DOCTYPE html>
 
             const verifierElem = document.getElementById('verifierValue');
             if (res.status === 'success') {
-                verifierElem.innerText = 'VERIFIED PASSED';
+                verifierElem.innerText = 'VERIFIED ✓';
                 verifierElem.style.color = 'var(--accent-green)';
             } else {
                 verifierElem.innerText = res.status.toUpperCase();
                 verifierElem.style.color = 'var(--accent-red)';
             }
 
+            // ── Result summary card ───────────────────────────────────────
+            const rc = document.getElementById('resultCard');
+            rc.style.display = 'block';
+            rc.className = 'result-card';
+
+            if (res.status === 'success' && res.final_answer) {
+                document.getElementById('resultIcon').innerText  = '✅';
+                document.getElementById('resultTitle').innerText = 'Task Completed Successfully';
+                document.getElementById('resultBody').innerText  = res.final_answer.content;
+                const grid = document.getElementById('resultDataGrid');
+                grid.innerHTML = '';
+                const data = res.final_answer.result_data || {};
+                Object.entries(data).forEach(([k, v]) => {
+                    const pill = document.createElement('div');
+                    pill.className = 'result-data-pill';
+                    pill.innerHTML = `<strong>${k.replace(/_/g,' ')}:</strong> ${JSON.stringify(v)}`;
+                    grid.appendChild(pill);
+                });
+            } else if (res.status === 'paused_for_user') {
+                rc.classList.add('paused');
+                document.getElementById('resultIcon').innerText  = '❓';
+                document.getElementById('resultTitle').innerText = 'Agent Needs Your Input';
+                document.getElementById('resultBody').innerText  = res.reason;
+                document.getElementById('resultDataGrid').innerHTML = '';
+            } else {
+                rc.classList.add('error');
+                document.getElementById('resultIcon').innerText  = '❌';
+                document.getElementById('resultTitle').innerText = 'Task Could Not Complete';
+                document.getElementById('resultBody').innerText  = res.reason;
+                document.getElementById('resultDataGrid').innerHTML = '';
+            }
+
+            // ── Human-readable step timeline ──────────────────────────────
             const timeline = document.getElementById('timeline');
             timeline.innerHTML = '';
+            let detailCounter = 0;
 
             if (res.events && res.events.length > 0) {
                 res.events.forEach(evt => {
-                    const card = document.createElement('div');
-                    card.className = 'event-card';
+                    const meta = EVENT_META[evt.event_type];
+                    if (!meta) return;   // skip hidden events (e.g. llm_request)
 
-                    const dateStr = new Date(evt.timestamp * 1000).toLocaleTimeString();
-                    const dataStr = Object.keys(evt.data).length > 0 ? JSON.stringify(evt.data, null, 2) : '';
+                    const timeStr = new Date(evt.timestamp * 1000).toLocaleTimeString();
+                    const dataStr = Object.keys(evt.data).length > 0
+                        ? JSON.stringify(evt.data, null, 2) : '';
+                    const detailId = 'detail-' + (detailCounter++);
 
-                    card.innerHTML = `
-                        <div class="event-header">
-                            <span class="event-type type-\${evt.event_type}">[Step \${evt.step}] \${evt.event_type}</span>
-                            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">\${dateStr}</span>
-                        </div>
-                        <div class="event-msg">\${evt.message}</div>
-                        \${dataStr ? `<pre class="event-data">\${dataStr}</pre>` : ''}
-                    `;
-                    timeline.appendChild(card);
+                    // Build a plain-English description
+                    let desc = evt.message;
+                    if (evt.event_type === 'tool_call_decided' && evt.data.name) {
+                        desc = `Calling tool: "${evt.data.name}"`;
+                        if (evt.data.args && Object.keys(evt.data.args).length) {
+                            const argsStr = Object.entries(evt.data.args)
+                                .map(([k,v]) => `${k}: ${JSON.stringify(v)}`).join(', ');
+                            desc += ` (${argsStr})`;
+                        }
+                    } else if (evt.event_type === 'tool_execution') {
+                        desc = evt.data.success
+                            ? `✓ Tool ran successfully`
+                            : `✗ Tool failed: ${evt.data.error || 'unknown error'}`;
+                    } else if (evt.event_type === 'verification_check') {
+                        desc = evt.data.passed
+                            ? `Result verified — ${evt.data.reason}`
+                            : `Verification failed — ${evt.data.reason}`;
+                    } else if (evt.event_type === 'policy_check') {
+                        desc = `Safety check for "${evt.data.decision || ''}" — ${evt.data.reason || evt.message}`;
+                    } else if (evt.event_type === 'final_claim') {
+                        desc = evt.data.content || evt.message;
+                    }
+
+                    const row = document.createElement('div');
+                    row.className = 'step-row';
+                    row.innerHTML = `
+                        <div class="step-icon ${meta.cls}">${meta.icon}</div>
+                        <div class="step-body">
+                            <div class="step-label">${meta.label}</div>
+                            <div class="step-desc">${desc}</div>
+                            <div class="step-time">${timeStr} &nbsp;·&nbsp; Step ${evt.step}</div>
+                            ${dataStr ? `<button class="step-detail-btn" onclick="toggleDetail('${detailId}')">Show details</button>
+                            <pre class="step-detail-raw" id="${detailId}">${dataStr}</pre>` : ''}
+                        </div>`;
+                    timeline.appendChild(row);
                 });
+            }
+
+            if (timeline.children.length === 0) {
+                timeline.innerHTML = '<div class="empty-state"><div>No steps recorded.</div></div>';
+            }
+        }
+
+        function toggleDetail(id) {
+            const el = document.getElementById(id);
+            const btn = el.previousElementSibling;
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+                btn.innerText = 'Show details';
+            } else {
+                el.style.display = 'block';
+                btn.innerText = 'Hide details';
             }
         }
     </script>
